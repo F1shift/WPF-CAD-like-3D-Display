@@ -1,0 +1,41 @@
+﻿<Window x:Class="WpfApplication2.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfApplication2"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="350" Width="525" Loaded="MainWindow_Loaded">
+    <Grid >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+        <Button x:Name="buttonReset" Grid.Row="0" Click="buttonReset_Click">Reset</Button>
+        <DockPanel Grid.Row="1" Background="#02FFFFFF"
+                   MouseWheel="MouseWheelHandler"
+                   MouseDown="MouseDownHandler"
+                   MouseUp="MouseUpHandler"
+		           MouseMove="MouseMoveHandler">
+            <Viewport3D x:Name="viewport" OpacityMask="#FFD35D5D">
+                <Viewport3D.Camera>
+                    <OrthographicCamera x:Name="camera"/>
+                </Viewport3D.Camera>
+                <ContainerUIElement3D x:Name="UIGroup" />
+                <ModelVisual3D x:Name="ModelVisual3D">
+                    <ModelVisual3D.Content>
+                        <Model3DGroup x:Name="ModelGroup">
+                        </Model3DGroup>
+                    </ModelVisual3D.Content>
+                </ModelVisual3D>
+                <ModelVisual3D>
+                    <ModelVisual3D.Content>
+                        <Model3DGroup x:Name="FixedLightGroup">
+                            <DirectionalLight Color="White" Direction="-5,-5,-7"/>
+                        </Model3DGroup>
+                    </ModelVisual3D.Content>
+                </ModelVisual3D>
+            </Viewport3D>
+        </DockPanel>
+    </Grid>
+</Window>
