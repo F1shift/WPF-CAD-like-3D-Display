@@ -124,11 +124,15 @@ namespace WpfApplication_PTL
 
         public async void LoadSTL()
         {
-            PTL.Geometry.Line line = new PTL.Geometry.Line();
-            line.p1 = new PointD(0, 0, 0);
-            line.p2 = new PointD(0, 0, 100);
-            line.Color = System.Drawing.Color.Red;
-            this.ViewPort1.AddModelAsUI(line.ToWPFGeometryModel3D());
+            PTL.Geometry.PolyLine pline = new PTL.Geometry.PolyLine();
+            pline.Points = new List<PTL.Geometry.MathModel.XYZ4>()
+            {
+                new PTL.Geometry.MathModel.XYZ4(0, 0, 100),
+                new PTL.Geometry.MathModel.XYZ4(0, 10, 100),
+                new PTL.Geometry.MathModel.XYZ4(10, 10, 100),
+            };
+            pline.Color = System.Drawing.Color.Red;
+            this.ViewPort1.AddModelAsUI(pline.ToWPFGeometryModel3D());
 
 
             STL stl = await STLReader.ReadSTLFile(
