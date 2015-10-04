@@ -17,20 +17,27 @@
                    MouseDown="MouseDownHandler"
                    MouseUp="MouseUpHandler"
 		           MouseMove="MouseMoveHandler">
-            <Viewport3D x:Name="viewport" OpacityMask="#FFD35D5D">
+            <Viewport3D x:Name="Viewport" OpacityMask="#FFD35D5D">
                 <Viewport3D.Camera>
                     <OrthographicCamera x:Name="camera"/>
                 </Viewport3D.Camera>
                 <ContainerUIElement3D x:Name="UIGroup" />
-                <ModelVisual3D x:Name="ModelVisual3D">
+                <ModelVisual3D x:Name="Model">
                     <ModelVisual3D.Content>
                         <Model3DGroup x:Name="ModelGroup">
                         </Model3DGroup>
                     </ModelVisual3D.Content>
                 </ModelVisual3D>
-                <ModelVisual3D>
+                <ModelVisual3D x:Name="Grid">
+                    <ModelVisual3D.Content>
+                        <Model3DGroup x:Name="GridGroup">
+                        </Model3DGroup>
+                    </ModelVisual3D.Content>
+                </ModelVisual3D>
+                <ModelVisual3D x:Name="FixedLight">
                     <ModelVisual3D.Content>
                         <Model3DGroup x:Name="FixedLightGroup">
+                            <DirectionalLight Color="#FF404040" Direction="5,5,7"/>
                             <DirectionalLight Color="White" Direction="-5,-5,-7"/>
                         </Model3DGroup>
                     </ModelVisual3D.Content>

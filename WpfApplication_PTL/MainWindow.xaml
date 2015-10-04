@@ -1,0 +1,14 @@
+﻿<Window x:Class="WpfApplication_PTL.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfApplication_PTL"
+        xmlns:ptl="clr-namespace:PTL.Windows.Controls;assembly=PTL"
+        mc:Ignorable="d"
+        Title="CAD_Like_ViewPort3D" Height="350" Width="525">
+    <Grid>
+        <ptl:CAD_Like_ViewPort3D x:Name="ViewPort1">
+        </ptl:CAD_Like_ViewPort3D>
+    </Grid>
+</Window>

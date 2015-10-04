@@ -17,6 +17,7 @@ using PTL.Geometry;
 using PTL.Geometry.MathModel;
 using PTL.FileOperation;
 using PTL.Geometry.WPFExtensions;
+using _3DTools;
 
 namespace WpfApplication2
 {
@@ -35,9 +36,6 @@ namespace WpfApplication2
         private Material selecetColor = new DiffuseMaterial(new SolidColorBrush(Color.FromArgb(255, 50, 125, 200)));
         private Model3DGroup SelectedModels = new Model3DGroup();
         
-        private bool leftMouseButtonDown;
-        private bool midleMouseButtonDown;
-        private bool rightMouseButtonDown;
         private bool mouseMovedAfterButtonDown;
         private Point mLastPos;
         private Point3D AllModelCenter = new Point3D(0, 0, 0);
@@ -142,12 +140,17 @@ namespace WpfApplication2
 
         public async void LoadSTL()
         {
-            STL stl = await STLReader.ReadSTLFile(@"C:\Users\F1shift\Google Drive\MIRDC\18-24-B-0.08mm+0.2mm\Part v2\2nd\2nd-1st - indent 8, 2, 4, 6\EGstl_C1_0907.STL");
+            STL stl = await STLReader.ReadSTLFile(
+                @"C:\Users\F1shift\Google Drive\MIRDC\18-24-B-0.08mm+0.2mm\Part v2\2nd\2nd-1st - indent 8, 2, 4, 6\EGstl_C1_0907.STL");
+            stl.Color = System.Drawing.Color.FromArgb(128, 128, 128, 128);
             GeometryModel3D mGeometry = stl.ToWPFGeometryModel3D();
 
             AddAsUI(mGeometry);
         }
 
+        
+
+        #region Change Item
         private void ModelGroup_Changed(object sender, EventArgs e)
         {
             AllModelCenter = getModelCenter(AllModels);
@@ -161,6 +164,68 @@ namespace WpfApplication2
                 rotateCenter = getModelCenter(AllModels);
         }
 
+        public void Add(params Model3D[] models)
+        {
+            this.Model.Content = null;
+            foreach (var model in models)
+            {
+                ModelGroup.Children.Add(model);
+                allModels.Children.Add(model);
+            }
+            this.Model.Content = ModelGroup;
+        }
+
+        public void AddAsUI(params Model3D[] models)
+        {
+            Viewport.Children.Remove(UIGroup);
+            foreach (var model in models)
+            {
+                ModelUIElement3D UIModel = new ModelUIElement3D();
+                UIModel.Model = model;
+                UIModel.MouseEnter += UI_MouseEnter;
+                UIModel.MouseLeave += UI_MouseLeave;
+                UIModel.MouseUp += UI_MouseUp;
+
+                UIGroup.Children.Add(UIModel);
+                allModels.Children.Add(model);
+            }
+            Viewport.Children.Add(UIGroup);
+        }
+
+        public void Clear()
+        {
+            ModelGroup.Children.Clear();
+            UIGroup.Children.Clear();
+            AllModels.Children.Clear();
+        }
+
+        public void AddSelectedModel(params Model3D[] models)
+        {
+            foreach (var model in models)
+            {
+                if (!SelectedModels.Children.Contains(model))
+                {
+                    SelectedModels.Children.Add(model);
+                    GeometryModel3D geometryModel3D = model as GeometryModel3D;
+                    if (geometryModel3D != null)
+                    {
+                        OriginalColor.Add(geometryModel3D, geometryModel3D.Material);
+                        geometryModel3D.Material = selecetColor;
+                    }
+                }
+            };
+        }
+
+        public void ClearSelectedModels()
+        {
+            SelectedModels.Children.Clear();
+            foreach (var item in OriginalColor)
+                item.Key.Material = item.Value;
+            OriginalColor.Clear();
+        }
+        #endregion Change Item
+
+        #region Transform
         public void TranslateViewTo(Model3D model)
         {
             Rect3D bound = model.Bounds;
@@ -172,8 +237,8 @@ namespace WpfApplication2
             double sizeX = bound.SizeX;
             double sizeY = bound.SizeY;
 
-            double viewport_Hight = viewport.ActualHeight;
-            double viewport_Width = viewport.ActualWidth;
+            double viewport_Hight = Viewport.ActualHeight;
+            double viewport_Width = Viewport.ActualWidth;
 
             double viewWidth = camera.Width / 180.0 * Math.PI;
 
@@ -232,67 +297,9 @@ namespace WpfApplication2
             allModelsT.Children.Add(transform);
             selectedModelsT.Children.Add(transform);
         }
+        #endregion Transform
 
-        public void Add(params Model3D[] models)
-        {
-            this.ModelVisual3D.Content = null;
-            foreach (var model in models)
-            {
-                ModelGroup.Children.Add(model);
-                allModels.Children.Add(model);
-            }
-            this.ModelVisual3D.Content = ModelGroup;
-        }
-
-        public void AddAsUI(params Model3D[] models)
-        {
-            viewport.Children.Remove(UIGroup);
-            foreach (var model in models)
-            {
-                ModelUIElement3D UIModel = new ModelUIElement3D();
-                UIModel.Model = model;
-                UIModel.MouseEnter += UI_MouseEnter;
-                UIModel.MouseLeave += UI_MouseLeave;
-                UIModel.MouseUp += UI_MouseUp;
-
-                UIGroup.Children.Add(UIModel);
-                allModels.Children.Add(model);
-            }
-            viewport.Children.Add(UIGroup);
-        }
-
-        public void Clear()
-        {
-            ModelGroup.Children.Clear();
-            UIGroup.Children.Clear();
-            AllModels.Children.Clear();
-        }
-
-        public void AddSelectedModel(params Model3D[] models)
-        {
-            foreach (var model in models)
-            {
-                if (!SelectedModels.Children.Contains(model))
-                {
-                    SelectedModels.Children.Add(model);
-                    GeometryModel3D geometryModel3D = model as GeometryModel3D;
-                    if (geometryModel3D != null)
-                    {
-                        OriginalColor.Add(geometryModel3D, geometryModel3D.Material);
-                        geometryModel3D.Material = selecetColor;
-                    }
-                }
-            };
-        }
-
-        public void ClearSelectedModels()
-        {
-            SelectedModels.Children.Clear();
-            foreach (var item in OriginalColor)
-                item.Key.Material = item.Value;
-            OriginalColor.Clear();
-        }
-
+        #region Mouse Event
         public void UI_MouseEnter(object sender, MouseEventArgs e)
         {
             ModelUIElement3D model = (ModelUIElement3D)sender;
@@ -342,12 +349,12 @@ namespace WpfApplication2
         private void MouseMoveHandler(object sender, MouseEventArgs e)
         {
             bool functioned = true;
-            if (midleMouseButtonDown)
+            if (e.RightButton == MouseButtonState.Pressed)
             {
-                double viewport_Hight = viewport.ActualHeight;
-                double viewport_Width = viewport.ActualWidth;
+                double viewport_Hight = Viewport.ActualHeight;
+                double viewport_Width = Viewport.ActualWidth;
 
-                Point pos = Mouse.GetPosition(viewport);
+                Point pos = Mouse.GetPosition(Viewport);
                 Point actualPos = new Point(pos.X - viewport_Width / 2, viewport_Hight / 2 - pos.Y);
                 double dx = actualPos.X - mLastPos.X, dy = actualPos.Y - mLastPos.Y;
 
@@ -375,14 +382,14 @@ namespace WpfApplication2
 
                 mLastPos = actualPos;
             }
-            else if (rightMouseButtonDown)
+            else if (e.MiddleButton == MouseButtonState.Pressed)
             {
-                double viewport_Hight = viewport.ActualHeight;
-                double viewport_Width = viewport.ActualWidth;
+                double viewport_Hight = Viewport.ActualHeight;
+                double viewport_Width = Viewport.ActualWidth;
                 double moveRate = camera.Width / viewport_Width;
 
-                Point pos = Mouse.GetPosition(viewport);
-                Point actualPos = new Point(pos.X - viewport.ActualWidth / 2, viewport.ActualHeight / 2 - pos.Y);
+                Point pos = Mouse.GetPosition(Viewport);
+                Point actualPos = new Point(pos.X - Viewport.ActualWidth / 2, Viewport.ActualHeight / 2 - pos.Y);
                 double dx = (actualPos.X - mLastPos.X) * moveRate;
                 double dy = (actualPos.Y - mLastPos.Y) * moveRate;
 
@@ -404,19 +411,14 @@ namespace WpfApplication2
 
         private void MouseDownHandler(object sender, MouseButtonEventArgs e)
         {
-            if (e.LeftButton == MouseButtonState.Pressed)
-            {
-                leftMouseButtonDown = true;
-            }
-            if (e.MiddleButton == MouseButtonState.Pressed)
+            if (e.RightButton == MouseButtonState.Pressed)
             {
                 if (e.ClickCount == 1)
                 {
-                    midleMouseButtonDown = true;
-                    Point pos = Mouse.GetPosition(viewport);
-                    mLastPos = new Point(pos.X - viewport.ActualWidth / 2, viewport.ActualHeight / 2 - pos.Y);
+                    Point pos = Mouse.GetPosition(Viewport);
+                    mLastPos = new Point(pos.X - Viewport.ActualWidth / 2, Viewport.ActualHeight / 2 - pos.Y);
                 }
-                else
+                else if (e.ClickCount == 2)
                 {
                     if (SelectedModels.Children.Count > 0)
                     {
@@ -429,15 +431,14 @@ namespace WpfApplication2
                 }
                 
             }
-            if (e.RightButton == MouseButtonState.Pressed)
+            if (e.MiddleButton == MouseButtonState.Pressed)
             {
                 if (e.ClickCount == 1)
                 {
-                    rightMouseButtonDown = true;
-                    Point pos = Mouse.GetPosition(viewport);
-                    mLastPos = new Point(pos.X - viewport.ActualWidth / 2, viewport.ActualHeight / 2 - pos.Y);
+                    Point pos = Mouse.GetPosition(Viewport);
+                    mLastPos = new Point(pos.X - Viewport.ActualWidth / 2, Viewport.ActualHeight / 2 - pos.Y);
                 }
-                else
+                else if (e.ClickCount == 2)
                 {
                     if (SelectedModels.Children.Count > 0)
                     {
@@ -454,12 +455,6 @@ namespace WpfApplication2
 
         private void MouseUpHandler(object sender, MouseButtonEventArgs e)
         {
-            if (e.LeftButton == MouseButtonState.Released)
-                leftMouseButtonDown = false;
-            if (e.MiddleButton == MouseButtonState.Released)
-                midleMouseButtonDown = false;
-            if (e.RightButton == MouseButtonState.Released)
-                rightMouseButtonDown = false;
             mouseMovedAfterButtonDown = false;
 
             if (e.ChangedButton == MouseButton.Left)
@@ -467,5 +462,304 @@ namespace WpfApplication2
                 ClearSelectedModels();
             }
         }
+        #endregion Mouse Event
+
+        #region Grid
+        //protected virtual void GanerateGridLayer(Color gridColor1, Color gridColor2, Color graduationColor)
+        //{
+        //    //清空格線
+        //    this.Viewport.Children.Remove(Grid);
+        //    Grid.Children.Clear();
+
+        //    //計算格線範圍
+        //    CalculateViewBoundary();
+
+        //    //計算格線密度
+        //    CalculateGridPitch();
+
+        //    #region 計算格線
+        //    //設定範圍
+        //    Double X1, X2, Y1, Y2;
+        //    PointD[] gridBoundary = new PointD[2];
+        //    if (this.GraduationOutside == false)
+        //    {
+        //        gridBoundary[0] = viewBoundary[0];
+        //        gridBoundary[1] = viewBoundary[1];
+        //    }
+        //    else
+        //    {
+        //        double xSpace = (viewBoundary[1].X - viewBoundary[0].X) / this.openGLWindow.Width * GraduationHeight;
+        //        double ySpace = (viewBoundary[1].Y - viewBoundary[0].Y) / this.openGLWindow.Height * GraduationHeight;
+        //        gridBoundary[0] = viewBoundary[0] + new XYZ4(2.0 * xSpace, ySpace, 0);
+        //        gridBoundary[1] = viewBoundary[1] - new XYZ4(xSpace, ySpace, 0);
+        //    }
+        //    //移動格線位置至內容的最後方，避免格線擋住顯示內容
+        //    if (gridBoundary != null)
+        //    {
+        //        if (geometryBoundary[0] != null)
+        //        {
+        //            gridBoundary[0].Z = geometryBoundary[0].Z - geometrySize.Z * 0.05;
+        //            gridBoundary[1].Z = geometryBoundary[0].Z - geometrySize.Z * 0.05;
+        //        }
+        //    }
+
+
+        //    X1 = System.Math.Ceiling(gridBoundary[0].X / xGridPitch) * xGridPitch;
+        //    X2 = System.Math.Floor(gridBoundary[1].X / xGridPitch) * xGridPitch;
+        //    Y1 = System.Math.Ceiling(gridBoundary[0].Y / yGridPitch) * yGridPitch;
+        //    Y2 = System.Math.Floor(gridBoundary[1].Y / yGridPitch) * yGridPitch;
+
+        //    String decFormat = "G4";
+
+        //    //文字、格線
+        //    Line tLine;
+        //    for (double x = X1; x <= X2; x += xGridPitch)
+        //    {
+        //        tLine = new Line(new PointD(x, gridBoundary[0].Y, gridBoundary[0].Z),
+        //                     new PointD(x, gridBoundary[1].Y, gridBoundary[0].Z));
+        //        //粗格線
+        //        if (Abs(x % (xGridPitch * 5.0)) < (xGridPitch * 0.5) || Abs(x % (xGridPitch * 5.0)) > (xGridPitch * 4.5))
+        //        {
+        //            tLine.Color = gridColor1;
+        //            tLine.LineType = LineType.Solid;
+        //            tLine.LineWidth = 0.5f;
+        //            //座標文字
+        //            if (this.GraduationOutside == false)
+        //                graduationLayer.AddEntity(new Text(x.ToString(decFormat),
+        //                                            new PointD(x + (gridBoundary[1].X - gridBoundary[0].X) / this.OpenGLWindow.Width * 5.0,
+        //                                                       gridBoundary[0].Y + (gridBoundary[1].Y - gridBoundary[0].Y) / this.OpenGLWindow.Height * 5.0,
+        //                                                       gridBoundary[0].Z),
+        //                                            graduationColor));
+        //            else
+        //                graduationLayer.AddEntity(new Text(x.ToString(decFormat),
+        //                                            new PointD(x,
+        //                                                       viewBoundary[0].Y + (viewBoundary[1].Y - viewBoundary[0].Y) / this.OpenGLWindow.Height * 5.0,
+        //                                                       gridBoundary[0].Z),
+        //                                            graduationColor));
+        //        }
+        //        //細格線
+        //        else
+        //        {
+        //            tLine.Color = gridColor2;
+        //            tLine.LineType = LineType.Solid;
+        //            tLine.LineWidth = 0.3f;
+        //        }
+        //        //加入格線
+        //        gridLayer.AddEntity(tLine);
+        //    }
+        //    for (double y = Y1; y <= Y2; y += yGridPitch)
+        //    {
+        //        //格線
+        //        tLine = new Line(new PointD(gridBoundary[0].X, y, gridBoundary[0].Z),
+        //                         new PointD(gridBoundary[1].X, y, gridBoundary[0].Z));
+        //        //粗格線
+        //        if (Abs(y % (yGridPitch * 5.0)) < (yGridPitch * 0.5) || Abs(y % (yGridPitch * 5.0)) > (yGridPitch * 4.5))
+        //        {
+        //            tLine.Color = gridColor1;
+        //            tLine.LineType = LineType.Solid;
+        //            tLine.LineWidth = 0.5f;
+        //            //座標文字
+        //            if (this.GraduationOutside == false)
+        //                graduationLayer.AddEntity(new Text(y.ToString(decFormat),
+        //                                   new PointD(gridBoundary[0].X + (gridBoundary[1].X - gridBoundary[0].X) / this.OpenGLWindow.Width * 5.0,
+        //                                              y + (gridBoundary[1].Y - gridBoundary[0].Y) / this.OpenGLWindow.Height * 5.0,
+        //                                              gridBoundary[0].Z),
+        //                                   graduationColor));
+        //            else
+        //                graduationLayer.AddEntity(new Text(y.ToString(decFormat),
+        //                                   new PointD(viewBoundary[0].X + (viewBoundary[1].X - viewBoundary[0].X) / this.OpenGLWindow.Width * 5.0,
+        //                                              y,
+        //                                              gridBoundary[0].Z),
+        //                                   graduationColor));
+        //        }
+        //        //細格線
+        //        else
+        //        {
+        //            tLine.Color = gridColor2;
+        //            tLine.LineType = LineType.Solid;
+        //            tLine.LineWidth = 0.3f;
+        //        }
+        //        //加入格線
+        //        gridLayer.AddEntity(tLine);
+        //    }
+
+        //    //邊框
+        //    //下
+        //    tLine = new Line(new PointD(gridBoundary[0].X,
+        //                                gridBoundary[0].Y,
+        //                                gridBoundary[0].Z),
+        //                     new PointD(gridBoundary[1].X,
+        //                                gridBoundary[0].Y,
+        //                                gridBoundary[1].Z));
+        //    tLine.Color = gridColor1;
+        //    tLine.LineType = LineType.Solid;
+        //    tLine.LineWidth = 0.5f;
+        //    gridLayer.AddEntity(tLine);
+        //    //右
+        //    tLine = new Line(new PointD(gridBoundary[1].X,
+        //                                gridBoundary[0].Y,
+        //                                gridBoundary[1].Z),
+        //                     new PointD(gridBoundary[1].X,
+        //                                gridBoundary[1].Y,
+        //                                gridBoundary[1].Z));
+        //    tLine.Color = gridColor1;
+        //    tLine.LineType = LineType.Solid;
+        //    tLine.LineWidth = 0.5f;
+        //    gridLayer.AddEntity(tLine);
+        //    //上
+        //    tLine = new Line(new PointD(gridBoundary[1].X,
+        //                                gridBoundary[1].Y,
+        //                                gridBoundary[1].Z),
+        //                     new PointD(gridBoundary[0].X,
+        //                                gridBoundary[1].Y,
+        //                                gridBoundary[0].Z));
+        //    tLine.Color = gridColor1;
+        //    tLine.LineType = LineType.Solid;
+        //    tLine.LineWidth = 0.5f;
+        //    gridLayer.AddEntity(tLine);
+        //    //左
+        //    tLine = new Line(new PointD(gridBoundary[0].X,
+        //                                gridBoundary[1].Y,
+        //                                gridBoundary[0].Z),
+        //                     new PointD(gridBoundary[0].X,
+        //                                gridBoundary[0].Y,
+        //                                gridBoundary[0].Z));
+        //    tLine.Color = gridColor1;
+        //    tLine.LineType = LineType.Solid;
+        //    tLine.LineWidth = 0.5f;
+        //    gridLayer.AddEntity(tLine);
+        //    #endregion 計算格線
+        //}
+
+        //protected virtual void CalculateViewBoundary()
+        //{
+        //    #region 計算視野範圍
+        //    viewBoundary[0] = centerPoint
+        //        - new XYZ4((Double)openGLWindow.M_Translation.X, (Double)openGLWindow.M_Translation.Y, 0) / (Double)openGLWindow.M_Scale
+        //        - new XYZ4(Range,
+        //                    Range * ((Double)openGLWindow.Height / (Double)openGLWindow.Width),
+        //                    0) / (Double)openGLWindow.M_Scale;
+        //    viewBoundary[1] = centerPoint
+        //        - new XYZ4((Double)openGLWindow.M_Translation.X, (Double)openGLWindow.M_Translation.Y, 0) / (Double)openGLWindow.M_Scale
+        //        + new XYZ4(Range,
+        //                    Range * ((Double)openGLWindow.Height / (Double)openGLWindow.Width),
+        //                    0) / (Double)openGLWindow.M_Scale;
+
+        //    gridSize = viewBoundary[1] - viewBoundary[0];
+
+        //    //依AspectRatio縮放
+        //    viewBoundary[0].X = this.centerPoint.X + (viewBoundary[0].X - this.centerPoint.X) / this.XScale;
+        //    viewBoundary[1].X = this.centerPoint.X + (viewBoundary[1].X - this.centerPoint.X) / this.XScale;
+        //    viewBoundary[0].Y = this.centerPoint.Y + (viewBoundary[0].Y - this.centerPoint.Y) / this.YScale;
+        //    viewBoundary[1].Y = this.centerPoint.Y + (viewBoundary[1].Y - this.centerPoint.Y) / this.YScale;
+
+        //    #endregion 計算格線範圍
+        //}
+
+        //protected virtual void CalculateGridPitch()
+        //{
+        //    //計算格線密度 1 2 5
+        //    #region X
+        //    int i = 0;
+        //    int j = 0;
+        //    bool findPicth = false;
+        //    while (!double.IsNaN(viewBoundary[0].X)
+        //        && !double.IsNegativeInfinity(viewBoundary[0].X)
+        //        && !double.IsPositiveInfinity(viewBoundary[0].X)
+        //        && !double.IsNaN(viewBoundary[1].X)
+        //        && !double.IsNegativeInfinity(viewBoundary[1].X)
+        //        && !double.IsPositiveInfinity(viewBoundary[1].X))
+        //    {
+        //        for (j = 0; j < gridPitchOption.Length; j++)
+        //            if (openGLWindow.Width / ((viewBoundary[1].X - viewBoundary[0].X) / (gridPitchOption[j] * Pow(10, i))) >= minGridPitch)
+        //            {
+        //                findPicth = true;
+        //                break;
+        //            }
+        //        if (findPicth)
+        //            break;
+        //        i++;
+        //    }
+        //    if (i == 0 && j == 0)
+        //    {
+        //        findPicth = false;
+        //        i--;
+        //        while (true)
+        //        {
+        //            for (j = gridPitchOption.Length - 1; j >= 0; j--)
+        //                if (openGLWindow.Width / ((viewBoundary[1].X - viewBoundary[0].X) / (gridPitchOption[j] * Pow(10, i))) < minGridPitch || (i == -4 && j == 0))
+        //                {
+        //                    findPicth = true;
+        //                    break;
+        //                }
+        //            if (findPicth)
+        //                break;
+        //            i--;
+        //        }
+
+        //        if (j < gridPitchOption.Length - 1)
+        //            j += 1;
+        //        else
+        //        {
+        //            i += 1;
+        //            j = 0;
+        //        }
+        //    }
+
+        //    xGridPitch = gridPitchOption[j] * Pow(10, i);
+        //    #endregion
+
+        //    #region Y
+        //    i = 0;
+        //    j = 0;
+        //    findPicth = false;
+        //    while (
+        //           !double.IsNaN(viewBoundary[0].Y)
+        //        && !double.IsNegativeInfinity(viewBoundary[0].Y)
+        //        && !double.IsPositiveInfinity(viewBoundary[0].Y)
+        //        && !double.IsNaN(viewBoundary[1].Y)
+        //        && !double.IsNegativeInfinity(viewBoundary[1].Y)
+        //        && !double.IsPositiveInfinity(viewBoundary[1].Y))
+        //    {
+        //        for (j = 0; j < gridPitchOption.Length; j++)
+        //            if (openGLWindow.Height / ((viewBoundary[1].Y - viewBoundary[0].Y) / (gridPitchOption[j] * Pow(10, i))) >= minGridPitch)
+        //            {
+        //                findPicth = true;
+        //                break;
+        //            }
+        //        if (findPicth)
+        //            break;
+        //        i++;
+        //    }
+        //    if (i == 0 && j == 0)
+        //    {
+        //        findPicth = false;
+        //        i--;
+        //        while (true)
+        //        {
+        //            for (j = gridPitchOption.Length - 1; j >= 0; j--)
+        //                if (openGLWindow.Height / ((viewBoundary[1].Y - viewBoundary[0].Y) / (gridPitchOption[j] * Pow(10, i))) < minGridPitch || (i == -4 && j == 0))
+        //                {
+        //                    findPicth = true;
+        //                    break;
+        //                }
+        //            if (findPicth)
+        //                break;
+        //            i--;
+        //        }
+
+        //        if (j < gridPitchOption.Length - 1)
+        //            j += 1;
+        //        else
+        //        {
+        //            i += 1;
+        //            j = 0;
+        //        }
+        //    }
+
+        //    yGridPitch = gridPitchOption[j] * Pow(10, i);
+        //    #endregion
+        //}
+        #endregion Grid
     }
 }
