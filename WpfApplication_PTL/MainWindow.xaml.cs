@@ -116,10 +116,19 @@ namespace WpfApplication_PTL
             GeometryModel3D mGeometry = new GeometryModel3D(mesh, new DiffuseMaterial(Brushes.YellowGreen));
             mGeometry.Transform = new Transform3DGroup();
             this.ViewPort1.AddModelAsUI(mGeometry);
-            ScreenSpaceLines3D line = new ScreenSpaceLines3D();
-            line.MakeWireframe(mGeometry);
-            //line.Po
-            this.ViewPort1.Viewport.Children.Add(line);
+            //ScreenSpaceLines3D line = new ScreenSpaceLines3D();
+            //line.Points.Add(new Point3D(-1, -1, 1));
+            //line.Points.Add(new Point3D(1, -1, 1));
+            //line.Points.Add(new Point3D(1, 1, 1));
+            //line.Points.Add(new Point3D(-1, 1, 1));
+            //line.Points.Add(new Point3D(-1, -1, -1));
+            //line.Points.Add(new Point3D(1, -1, -1));
+            //line.Points.Add(new Point3D(1, 1, -1));
+            //line.Points.Add(new Point3D(-1, 1, -1));
+            //line.Color = Colors.AliceBlue;
+            //line.Thickness = 10;
+            ////line.Po
+            ////this.ViewPort1.Viewport.Children.Add(line);
         }
 
         public async void LoadSTL()
@@ -132,13 +141,14 @@ namespace WpfApplication_PTL
                 new PTL.Geometry.MathModel.XYZ4(10, 10, 100),
             };
             pline.Color = System.Drawing.Color.Red;
-            this.ViewPort1.AddModelAsUI(pline.ToWPFGeometryModel3D());
+            var result = pline.ToWPFGeometryModel3D(new[] { 0, 0, -1.0 }, new[] { 0, 1.0, 0 }, 80, 400);
+            this.ViewPort1.AddModelAsUI(result.Item1);
 
 
             STL stl = await STLReader.ReadSTLFile(
                 @"C:\Users\F1shift\Google Drive\MIRDC\18-24-B-0.08mm+0.2mm\Part v2\2nd\2nd-1st - indent 8, 2, 4, 6\EGstl_C1_0907.STL");
             stl.Color = System.Drawing.Color.FromArgb(128, 128, 128, 128);
-            GeometryModel3D mGeometry = stl.ToWPFGeometryModel3D();
+            Model3D mGeometry = stl.ToWPFGeometryModel3D();
 
             this.ViewPort1.AddModelAsUI(mGeometry);
         }

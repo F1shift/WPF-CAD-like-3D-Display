@@ -143,7 +143,7 @@ namespace WpfApplication2
             STL stl = await STLReader.ReadSTLFile(
                 @"C:\Users\F1shift\Google Drive\MIRDC\18-24-B-0.08mm+0.2mm\Part v2\2nd\2nd-1st - indent 8, 2, 4, 6\EGstl_C1_0907.STL");
             stl.Color = System.Drawing.Color.FromArgb(128, 128, 128, 128);
-            GeometryModel3D mGeometry = stl.ToWPFGeometryModel3D();
+            Model3D mGeometry = stl.ToWPFGeometryModel3D();
 
             AddAsUI(mGeometry);
         }
