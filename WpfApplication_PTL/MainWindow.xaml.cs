@@ -115,7 +115,7 @@ namespace WpfApplication_PTL
 
             GeometryModel3D mGeometry = new GeometryModel3D(mesh, new DiffuseMaterial(Brushes.YellowGreen));
             mGeometry.Transform = new Transform3DGroup();
-            this.ViewPort1.AddModelAsUI(mGeometry);
+            this.ViewPort1.AddModel(mGeometry);
             //ScreenSpaceLines3D line = new ScreenSpaceLines3D();
             //line.Points.Add(new Point3D(-1, -1, 1));
             //line.Points.Add(new Point3D(1, -1, 1));
@@ -133,16 +133,18 @@ namespace WpfApplication_PTL
 
         public async void LoadSTL()
         {
-            PTL.Geometry.PolyLine pline = new PTL.Geometry.PolyLine();
+            PTL.Geometry.PolyLine pline = new PTL.Geometry.PolyLine() { LineWidth = 1 };
             pline.Points = new List<PTL.Geometry.MathModel.XYZ4>()
             {
                 new PTL.Geometry.MathModel.XYZ4(0, 0, 100),
                 new PTL.Geometry.MathModel.XYZ4(0, 10, 100),
                 new PTL.Geometry.MathModel.XYZ4(10, 10, 100),
+                new PTL.Geometry.MathModel.XYZ4(20, 0, 100),
+                new PTL.Geometry.MathModel.XYZ4(30, 30, 100),
             };
             pline.Color = System.Drawing.Color.Red;
             var result = pline.ToWPFGeometryModel3D(new[] { 0, 0, -1.0 }, new[] { 0, 1.0, 0 }, 80, 400);
-            this.ViewPort1.AddModelAsUI(result.Item1);
+            this.ViewPort1.AddWireframeModel(result);
 
 
             STL stl = await STLReader.ReadSTLFile(
@@ -150,7 +152,7 @@ namespace WpfApplication_PTL
             stl.Color = System.Drawing.Color.FromArgb(128, 128, 128, 128);
             Model3D mGeometry = stl.ToWPFGeometryModel3D();
 
-            this.ViewPort1.AddModelAsUI(mGeometry);
+            this.ViewPort1.AddModel(mGeometry);
         }
     }
 }
