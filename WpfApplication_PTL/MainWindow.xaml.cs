@@ -137,9 +137,8 @@ namespace WpfApplication_PTL
 
         public async void LoadSTL()
         {
-            
-                PTL.Geometry.PolyLine pline = new PTL.Geometry.PolyLine() { LineWidth = 1 };
-            for (double i = 0; i < 400; i += 0.5)
+            PTL.Geometry.PolyLine pline = new PTL.Geometry.PolyLine() { LineWidth = 1 };
+            for (double i = 0; i < 400; i += 0.25)
             {
                 pline.Points.Add(new PTL.Geometry.MathModel.XYZ4(0, 0, i));
                 pline.Points.Add(new PTL.Geometry.MathModel.XYZ4(0, 10, i));
@@ -147,49 +146,21 @@ namespace WpfApplication_PTL
                 pline.Points.Add(new PTL.Geometry.MathModel.XYZ4(20, 0, i));
                 pline.Points.Add(new PTL.Geometry.MathModel.XYZ4(30, 30, i));
             }
-
             pline.Color = System.Drawing.Color.Red;
-            var result = pline.ToWPFGeometryModel3D();
-            //this.ViewPort1.AddInteractiveWireframeModel(result);
-            this.ViewPort1.AddInteractiveModel(result);
+            var result = pline.ToLineGeometryModel3D();
+            this.ViewPort1.AddInteractiveWireframeModel(result);
+                //this.ViewPort1.AddInteractiveModel(result);
+            
 
 
 
             STL stl = await STLReader.ReadSTLFile(
                 @"C:\Users\F1shift\Google Drive\MIRDC\18-24-B-0.08mm+0.2mm\Part v2\2nd\2nd-1st - indent 8, 2, 4, 6\EGstl_C1_0907.STL");
             stl.Color = System.Drawing.Color.FromArgb(128, 128, 128, 128);
-            Model3D mGeometry = stl.ToWPFGeometryModel3D();
+            Model3D mGeometry = stl.ToModel3D();
             this.ViewPort1.AddInteractiveModel(mGeometry);
 
             this.ViewPort1.TranslateViewTo(this.ViewPort1.AllModels);
-
-            List<RayMeshGeometry3DHitTestResult> hitResults = new List<RayMeshGeometry3DHitTestResult>();
-
-            Func<HitTestResult, HitTestResultBehavior> ResultCallback = (re) =>
-            #region
-            {
-                RayHitTestResult rayResult = re as RayHitTestResult;
-                //Did we hit 3D?
-                if (rayResult != null)
-                {
-                    RayMeshGeometry3DHitTestResult rayMeshResult = re as RayMeshGeometry3DHitTestResult;
-                    //Did we hit MeshGeometry3D?
-                    if (rayMeshResult != null)
-                    {
-                        hitResults.Add(rayMeshResult);
-                        //rayMeshResult.VisualHit
-                        return HitTestResultBehavior.Stop;
-                    }
-                }
-
-                return HitTestResultBehavior.Continue;
-            };
-            #endregion
-            DateTime startTime = DateTime.Now;
-            VisualTreeHelper.HitTest(ViewPort1.MovingUIElementsVisual3D, null, new HitTestResultCallback(ResultCallback), new RayHitTestParameters(new Point3D(0, 0.1, 250), new Vector3D(0, 0, -1)));
-            DateTime endTime = DateTime.Now;
-            TimeSpan dt = endTime - startTime;
-            double ms = dt.TotalMilliseconds;
         }
 
         
