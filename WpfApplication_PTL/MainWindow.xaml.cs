@@ -28,6 +28,10 @@ namespace WpfApplication_PTL
         public MainWindow()
         {
             InitializeComponent();
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
             BuildSolid();
             LoadSTL();
         }
@@ -115,7 +119,7 @@ namespace WpfApplication_PTL
 
             GeometryModel3D mGeometry = new GeometryModel3D(mesh, new DiffuseMaterial(Brushes.YellowGreen));
             mGeometry.Transform = new Transform3DGroup();
-            this.ViewPort1.AddModel(mGeometry);
+            this.ViewPort1.AddInteractiveModel(mGeometry);
             //ScreenSpaceLines3D line = new ScreenSpaceLines3D();
             //line.Points.Add(new Point3D(-1, -1, 1));
             //line.Points.Add(new Point3D(1, -1, 1));
@@ -133,26 +137,61 @@ namespace WpfApplication_PTL
 
         public async void LoadSTL()
         {
-            PTL.Geometry.PolyLine pline = new PTL.Geometry.PolyLine() { LineWidth = 1 };
-            pline.Points = new List<PTL.Geometry.MathModel.XYZ4>()
+            
+                PTL.Geometry.PolyLine pline = new PTL.Geometry.PolyLine() { LineWidth = 1 };
+            for (double i = 0; i < 400; i += 0.5)
             {
-                new PTL.Geometry.MathModel.XYZ4(0, 0, 100),
-                new PTL.Geometry.MathModel.XYZ4(0, 10, 100),
-                new PTL.Geometry.MathModel.XYZ4(10, 10, 100),
-                new PTL.Geometry.MathModel.XYZ4(20, 0, 100),
-                new PTL.Geometry.MathModel.XYZ4(30, 30, 100),
-            };
+                pline.Points.Add(new PTL.Geometry.MathModel.XYZ4(0, 0, i));
+                pline.Points.Add(new PTL.Geometry.MathModel.XYZ4(0, 10, i));
+                pline.Points.Add(new PTL.Geometry.MathModel.XYZ4(10, 10, i));
+                pline.Points.Add(new PTL.Geometry.MathModel.XYZ4(20, 0, i));
+                pline.Points.Add(new PTL.Geometry.MathModel.XYZ4(30, 30, i));
+            }
+
             pline.Color = System.Drawing.Color.Red;
-            var result = pline.ToWPFGeometryModel3D(new[] { 0, 0, -1.0 }, new[] { 0, 1.0, 0 }, 80, 400);
-            this.ViewPort1.AddWireframeModel(result);
+            var result = pline.ToWPFGeometryModel3D();
+            //this.ViewPort1.AddInteractiveWireframeModel(result);
+            this.ViewPort1.AddInteractiveModel(result);
+
 
 
             STL stl = await STLReader.ReadSTLFile(
                 @"C:\Users\F1shift\Google Drive\MIRDC\18-24-B-0.08mm+0.2mm\Part v2\2nd\2nd-1st - indent 8, 2, 4, 6\EGstl_C1_0907.STL");
             stl.Color = System.Drawing.Color.FromArgb(128, 128, 128, 128);
             Model3D mGeometry = stl.ToWPFGeometryModel3D();
+            this.ViewPort1.AddInteractiveModel(mGeometry);
 
-            this.ViewPort1.AddModel(mGeometry);
+            this.ViewPort1.TranslateViewTo(this.ViewPort1.AllModels);
+
+            List<RayMeshGeometry3DHitTestResult> hitResults = new List<RayMeshGeometry3DHitTestResult>();
+
+            Func<HitTestResult, HitTestResultBehavior> ResultCallback = (re) =>
+            #region
+            {
+                RayHitTestResult rayResult = re as RayHitTestResult;
+                //Did we hit 3D?
+                if (rayResult != null)
+                {
+                    RayMeshGeometry3DHitTestResult rayMeshResult = re as RayMeshGeometry3DHitTestResult;
+                    //Did we hit MeshGeometry3D?
+                    if (rayMeshResult != null)
+                    {
+                        hitResults.Add(rayMeshResult);
+                        //rayMeshResult.VisualHit
+                        return HitTestResultBehavior.Stop;
+                    }
+                }
+
+                return HitTestResultBehavior.Continue;
+            };
+            #endregion
+            DateTime startTime = DateTime.Now;
+            VisualTreeHelper.HitTest(ViewPort1.MovingUIElementsVisual3D, null, new HitTestResultCallback(ResultCallback), new RayHitTestParameters(new Point3D(0, 0.1, 250), new Vector3D(0, 0, -1)));
+            DateTime endTime = DateTime.Now;
+            TimeSpan dt = endTime - startTime;
+            double ms = dt.TotalMilliseconds;
         }
+
+        
     }
 }

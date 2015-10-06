@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:WpfApplication_PTL"
         xmlns:ptl="clr-namespace:PTL.Windows.Controls;assembly=PTL"
         mc:Ignorable="d"
-        Title="CAD_Like_ViewPort3D" Height="350" Width="525">
+        Title="CAD_Like_ViewPort3D" Height="350" Width="525" Loaded="Window_Loaded">
     <Grid>
         <ptl:CAD_Like_ViewPort3D x:Name="ViewPort1">
         </ptl:CAD_Like_ViewPort3D>
