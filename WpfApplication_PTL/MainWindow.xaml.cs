@@ -32,8 +32,8 @@ namespace WpfApplication_PTL
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            BuildSolid();
-            LoadSTL();
+            //BuildSolid();
+            //LoadSTL();
         }
 
         public void BuildSolid()
@@ -137,32 +137,30 @@ namespace WpfApplication_PTL
 
         public async void LoadSTL()
         {
-            PTL.Geometry.PolyLine pline = new PTL.Geometry.PolyLine() { LineWidth = 1 };
-            for (double i = 0; i < 400; i += 0.25)
-            {
-                pline.Points.Add(new PTL.Geometry.MathModel.XYZ4(0, 0, i));
-                pline.Points.Add(new PTL.Geometry.MathModel.XYZ4(0, 10, i));
-                pline.Points.Add(new PTL.Geometry.MathModel.XYZ4(10, 10, i));
-                pline.Points.Add(new PTL.Geometry.MathModel.XYZ4(20, 0, i));
-                pline.Points.Add(new PTL.Geometry.MathModel.XYZ4(30, 30, i));
-            }
-            pline.Color = System.Drawing.Color.Red;
-            var result = pline.ToLineGeometryModel3D();
-            this.ViewPort1.AddInteractiveWireframeModel(result);
+            //PTL.Geometry.PolyLine pline = new PTL.Geometry.PolyLine() { LineWidth = 1 };
+            //for (double i = 0; i < 400; i += 0.25)
+            //{
+            //    pline.Points.Add(new PTL.Geometry.MathModel.XYZ4(0, 0, i));
+            //    pline.Points.Add(new PTL.Geometry.MathModel.XYZ4(0, 10, i));
+            //    pline.Points.Add(new PTL.Geometry.MathModel.XYZ4(10, 10, i));
+            //    pline.Points.Add(new PTL.Geometry.MathModel.XYZ4(20, 0, i));
+            //    pline.Points.Add(new PTL.Geometry.MathModel.XYZ4(30, 30, i));
+            //}
+            //pline.Color = System.Drawing.Color.Red;
+            //var result = pline.ToLineGeometryModel3D();
+            //this.ViewPort1.AddInteractiveWireframeModel(result);
                 //this.ViewPort1.AddInteractiveModel(result);
             
 
 
 
-            STL stl = await STLReader.ReadSTLFile(
-                @"C:\Users\F1shift\Google Drive\MIRDC\18-24-B-0.08mm+0.2mm\Part v2\2nd\2nd-1st - indent 8, 2, 4, 6\EGstl_C1_0907.STL");
-            stl.Color = System.Drawing.Color.FromArgb(128, 128, 128, 128);
-            Model3D mGeometry = stl.ToModel3D();
-            this.ViewPort1.AddInteractiveModel(mGeometry);
+            //STL stl = await STLReader.ReadSTLFile(
+            //    @"C:\Users\F1shift\Google Drive\MIRDC\18-24-B-0.08mm+0.2mm\Part v2\2nd\2nd-1st - indent 8, 2, 4, 6\EGstl_C1_0907.STL");
+            //stl.Color = System.Drawing.Color.FromArgb(255, 255, 255, 0);
+            //Model3D mGeometry = stl.ToModel3D();
+            //this.ViewPort1.AddInteractiveModel(mGeometry);
 
-            this.ViewPort1.TranslateViewTo(this.ViewPort1.AllModels);
+            //this.ViewPort1.TranslateViewTo(this.ViewPort1.AllModels);
         }
-
-        
     }
 }
