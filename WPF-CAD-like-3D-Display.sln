@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfApplication_PTL", "WpfApplication_PTL\WpfApplication_PTL.csproj", "{42FF95FC-F036-4513-A57B-34B3C5AF9361}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WPF-CAD-like-3D-Display", "WpfApplication_PTL\WPF-CAD-like-3D-Display.csproj", "{42FF95FC-F036-4513-A57B-34B3C5AF9361}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PTL", "..\PTL-Project\PTL.csproj", "{6808380D-A59B-46C9-AA13-DCB968182DC3}"
 EndProject
