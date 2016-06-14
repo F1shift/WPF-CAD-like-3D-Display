@@ -6,9 +6,14 @@
         xmlns:local="clr-namespace:WpfApplication_PTL"
         xmlns:ptl="clr-namespace:PTL.Windows.Controls;assembly=PTL"
         mc:Ignorable="d"
-        Title="CAD_Like_ViewPort3D" Height="350" Width="525" Loaded="Window_Loaded" AllowDrop="True">
+        Title="CAD_Like_ViewPort3D" Height="600" Width="900" Loaded="Window_Loaded" AllowDrop="True">
     <Grid>
-        <ptl:CAD_Like_ViewPort3D x:Name="ViewPort1">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+        <Button Click="Button_Click">Clear</Button>
+        <ptl:CAD_Like_ViewPort3D x:Name="CAD_Like_ViewPort3D" Grid.Row="1" Grid.RowSpan="2">
         </ptl:CAD_Like_ViewPort3D>
     </Grid>
 </Window>

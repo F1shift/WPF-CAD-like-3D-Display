@@ -119,7 +119,7 @@ namespace WpfApplication_PTL
 
             GeometryModel3D mGeometry = new GeometryModel3D(mesh, new DiffuseMaterial(Brushes.YellowGreen));
             mGeometry.Transform = new Transform3DGroup();
-            this.ViewPort1.AddInteractiveModel(mGeometry);
+            this.CAD_Like_ViewPort3D.AddInteractiveModel(mGeometry);
             //ScreenSpaceLines3D line = new ScreenSpaceLines3D();
             //line.Points.Add(new Point3D(-1, -1, 1));
             //line.Points.Add(new Point3D(1, -1, 1));
@@ -161,6 +161,11 @@ namespace WpfApplication_PTL
             //this.ViewPort1.AddInteractiveModel(mGeometry);
 
             //this.ViewPort1.TranslateViewTo(this.ViewPort1.AllModels);
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            this.CAD_Like_ViewPort3D.Clear();
         }
     }
 }
